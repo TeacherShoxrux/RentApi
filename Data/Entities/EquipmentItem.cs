@@ -6,7 +6,7 @@ public class EquipmentItem : BaseEntity
     public string SerialNumber { get; set; } = string.Empty;
 
     // Hozirgi holati: "Available", "Rented", "Repairing", "Lost"
-    public string Status { get; set; } = "Available";
+    public EEquipmentStatus Status { get; set; };
 
     // Necha marta ijaraga berilganligi (eskirishini kuzatish uchun)
     public int UsageCount { get; set; }

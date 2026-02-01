@@ -28,4 +28,5 @@ public class RentalOrder : BaseEntity
     // public virtual Customer Customer { get; set; } = null!;
     // public virtual Warehouse Warehouse { get; set; } = null!;
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    public virtual ICollection<RentalOrderItem> Items { get; set; } = new List<RentalOrderItem>();
 }
