@@ -44,7 +44,6 @@ public static class DbSeeder
 
           // MUHIM: "1111" ni hashlab yozamiz
           SecurityCode = "1111".ToSha256(),
-
           WarehouseId = mainWarehouse.Id,
           IsActive = true,
           CreatedAt = DateTime.UtcNow

@@ -11,8 +11,8 @@ public class Phone : BaseEntity
     // --- Tashqi bog'liqlik ---
     
     // Raqam qaysi mijozga tegishli
-    public int CustomerId { get; set; }
-    public virtual Customer Customer { get; set; } = null!;
+    public int? CustomerId { get; set; }
+    public virtual Customer? Customer { get; set; } = null!;
     // Navigatsiya property (ixtiyoriy, Customer yaratilgach ishlatish mumkin)
     // public virtual Customer Customer { get; set; } = null!;
 }

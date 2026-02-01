@@ -2,7 +2,6 @@ namespace RentApi.Data.Entities;
 
 public class Document : BaseEntity
 {
-    // Hujjat turi (Passport, ID Card) - UI dagi "Passport turi" dropdownidan keladi
     public string DocumentType { get; set; } = "Passport";
 
     // Hujjat nomi 
@@ -20,7 +19,7 @@ public class Document : BaseEntity
     public string? Details { get; set; }
 
     // Status: "Active", "Expired", "InSafe" (Seyfda), "Returned" (Qaytarildi)
-    public string? Status { get; set; }
+    public  EDocumentStatus Status { get; set; } = EDocumentStatus.Active;
 
     // --- YANGI QO'SHILGAN QISM (ZALOG UCHUN) ---
 
@@ -34,6 +33,6 @@ public class Document : BaseEntity
     public DateTime? ReturnedAt { get; set; }
 
     // --- Bog'liqlik ---
-    public int CustomerId { get; set; }
-    public virtual Customer Customer { get; set; } = null!;
+    public int? CustomerId { get; set; }
+    public virtual Customer? Customer { get; set; }
 }

@@ -1,6 +1,7 @@
 using RentApi.Application.Repositries;
 using RentApi.Application.Repositries.Interfaces;
 using RentApi.Data;
+using RentApi.Data.Entities;
 using RentApi.Data.Repositories;
 
 namespace RentApi.Application.UnitOfWork;
@@ -45,6 +46,8 @@ public class UnitOfWork : IUnitOfWork
   {
     return await _context.SaveChangesAsync();
   }
+
+  public IGenericRepository<T> Repository<T>() where T : BaseEntity=>new GenericRepository<T>(_context);
 
   public void Dispose()
   {

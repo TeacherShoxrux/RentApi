@@ -14,7 +14,7 @@ public class CreateCustomerDto
   // Hujjat ma'lumotlari
   public string PassportSeries { get; set; } = string.Empty; // Masalan: AA
   public string PassportNumber { get; set; } = string.Empty; // Masalan: 1234567
-  public string JShShIR { get; set; } = string.Empty; // PINFL
+  public string? JShShIR { get; set; } = string.Empty; // PINFL
   public bool? IsWoman { get; set; }
   // --- MUHIM: ZALOG QISMI ---
   // UI dagi "Passport bormi?" degan joy yoki alohida checkbox

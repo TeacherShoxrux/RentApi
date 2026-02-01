@@ -15,6 +15,23 @@ public class CustomersController : ControllerBase
     _service = service;
   }
 
+  [HttpGet]
+  public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int size = 20,
+    [FromQuery] string? search = null)
+  {
+    var result = await _service.GetPagedCustomersAsync(search,page, size);
+    return Ok(result);
+  }
+
+  [HttpPatch("{id}/toggle-passport")]
+  public async Task<IActionResult> TogglePassport(int id)
+  {
+    var result = await _service.TogglePassportLocationAsync(id);
+    return Ok(result);
+  }
+
+
+
   [HttpPost]
   // [FromForm] ishlatamiz, chunki rasm va fayllar keladi
   public async Task<IActionResult> Create([FromForm] CreateCustomerDto dto)

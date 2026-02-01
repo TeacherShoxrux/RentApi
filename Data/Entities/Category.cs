@@ -1,12 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RentApi.Data.Entities;
 public class Category : BaseEntity
     {
-        [Required(ErrorMessage = "Kategoriya nomi kiritilishi shart")]
-        [StringLength(100)]
-        public string Name { get; set; }
+
+        public string Name { get; set; }= string.Empty;
 
         [StringLength(500)]
         public string? Image { get; set; }
@@ -14,17 +12,13 @@ public class Category : BaseEntity
         [StringLength(1000)]
         public string? Details { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string CreatedBy { get; set; }
+        public string? AdminId { get; set; }
+        public virtual Admin? Admin { get; set; }
 
         // --- Foreign Key (Bog'liqlik) ---
 
-        [Required]
-        public int BrandId { get; set; } // Brendning Id-si
-
-        [ForeignKey("BrandId")]
-        public virtual Brand Brand { get; set; } // Navigatsiya property
+        public int? BrandId { get; set; } // Brendning Id-si
+        public virtual Brand? Brand { get; set; } // Navigatsiya property
         public virtual ICollection<Equipment> Equipments { get; set; } = new List<Equipment>();
 
     }

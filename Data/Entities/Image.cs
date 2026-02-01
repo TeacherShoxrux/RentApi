@@ -9,7 +9,9 @@ public class Image : BaseEntity
 
     // Tashqi bog'liqlik (Uskuna bilan bog'lash)
     public int EquipmentId { get; set; }
-    
+    public string? AdminId { get; set; }
+
+    public virtual Admin? Admin { get; set; }
     // Navigatsiya property
     public virtual Equipment Equipment { get; set; } = null!;
 }

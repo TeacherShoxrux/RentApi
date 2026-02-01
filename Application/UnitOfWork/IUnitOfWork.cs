@@ -1,4 +1,5 @@
 using RentApi.Application.Repositries.Interfaces;
+using RentApi.Data.Entities;
 
 namespace RentApi.Application.UnitOfWork;
 public interface IUnitOfWork : IDisposable
@@ -10,4 +11,6 @@ public interface IUnitOfWork : IDisposable
   IAdminRepository Admins { get; }
   IWareHouseRepository WareHouses { get; }
   Task<int> CompleteAsync();
+  IGenericRepository<T> Repository<T>() where T : BaseEntity;
+  
 }

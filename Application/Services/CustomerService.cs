@@ -1,7 +1,7 @@
+using System.Linq.Expressions;
 using RentApi.Application.DTOs;
 using RentApi.Application.Services.Interfaces;
 using RentApi.Data.Entities;
-using Microsoft.AspNetCore.Hosting;
 using RentApi.Application.UnitOfWork; // Fayl saqlash uchun
 
 namespace RentApi.Application.Services;
@@ -17,8 +17,9 @@ public class CustomerService : ICustomerService
     _env = env;
   }
 
-  public async Task<CustomerDto> CreateCustomerAsync(CreateCustomerDto dto)
+  public async Task<ResponseDto<CustomerDto>> CreateCustomerAsync(CreateCustomerDto dto)
   {
+    try{
     // 1. Validatsiya: JSHSHIR bo'yicha tekshirish
     var existing = await _unitOfWork.Customers.GetByDocumentAsync(dto.JShShIR);
     if (existing != null)
@@ -57,34 +58,34 @@ public class CustomerService : ICustomerService
       // --- ZALOG LOGIKASI ---
       IsOriginalLeft = dto.IsOriginalDocumentLeft,
       LeftAt = dto.IsOriginalDocumentLeft ? DateTime.UtcNow : null,
-      Status = dto.IsOriginalDocumentLeft ? "Zalogda (Seyfda)" : "Mijozda",
+      Status = EDocumentStatus.Active,
 
       // Fayl yo'li (Pastda yuklaymiz)
-      FilePath = ""
+      FilePath = "///"
     };
 
     // 4. Faylni yuklash (Passport Scan)
-    if (dto.DocumentScans != null && dto.DocumentScans.Count > 0)
+  if (dto.DocumentScans != null && dto.DocumentScans.Count > 0)
+  {
+    var file = dto.DocumentScans[0];
+
+    // WebRootPath null bo'lsa, joriy papkadan foydalanamiz
+    string baseRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+    string uploadsFolder = Path.Combine(baseRoot, "uploads", "documents");
+
+    if (!Directory.Exists(uploadsFolder))
+      Directory.CreateDirectory(uploadsFolder);
+
+    string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+    using (var fileStream = new FileStream(filePath, FileMode.Create))
     {
-      // Faqat birinchi faylni olamiz (yoki ko'p fayl uchun alohida jadval kerak)
-      var file = dto.DocumentScans[0];
-      string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "documents");
-
-      // Papka yo'q bo'lsa yaratamiz
-      if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-      // Unikal nom beramiz: GUID + original nom
-      string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-      string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-      using (var fileStream = new FileStream(filePath, FileMode.Create))
-      {
-        await file.CopyToAsync(fileStream);
-      }
-
-      // Bazaga faqat fayl nomini yoki nisbiy yo'lni yozamiz
-      document.FilePath = $"/uploads/documents/{uniqueFileName}";
+      await file.CopyToAsync(fileStream);
     }
+
+    document.FilePath = $"/uploads/documents/{uniqueFileName}";
+  }
 
     // Hujjatni mijozga qo'shamiz
     customer.Documents.Add(document);
@@ -93,7 +94,14 @@ public class CustomerService : ICustomerService
     await _unitOfWork.Customers.AddAsync(customer);
     await _unitOfWork.CompleteAsync();
 
-    return MapToDto(customer);
+    var result = MapToDto(customer);
+    return ResponseDto<CustomerDto>.Success(result);
+    }
+    catch (Exception ex)
+    {
+      return ResponseDto<CustomerDto>.Fail($"Xatolik: {ex.Message}");
+    }
+
   }
 
   // Hujjatni qaytarib berish funksiyasi
@@ -110,12 +118,69 @@ public class CustomerService : ICustomerService
 
     // Statusni o'zgartiramiz
     doc.IsOriginalLeft = false;
-    doc.Status = "Qaytarildi";
+    doc.Status = EDocumentStatus.Returned;
     doc.ReturnedAt = DateTime.UtcNow;
 
     _unitOfWork.Customers.Update(customer); // Yoki Documents reposi orqali update
     await _unitOfWork.CompleteAsync();
   }
+
+  public async Task<PagedResponseDto<IEnumerable<CustomerDto>>> GetPagedCustomersAsync(string? searchTerm = null,int pageNumber=1, int pageSize=20)
+  {
+    try
+    {
+      // 1. Filtrlash mantiqi
+      Expression<Func<Customer, bool>> filter = c =>
+        string.IsNullOrEmpty(searchTerm) ||
+        c.FirstName.Contains(searchTerm) ||
+        c.LastName.Contains(searchTerm) ||
+        c.JShShIR.Contains(searchTerm);
+
+      // 2. Jami yozuvlar sonini olish (Pagenation uchun)
+      var totalRecords = (await _unitOfWork.Customers.FindAsync(filter)).Count();
+
+      // 3. Ma'lumotlarni qismlarga bo'lib olish (Skip & Take)
+      var customers = await _unitOfWork.Customers.GetAllBoxedAsync(
+        filter: filter,
+        orderBy: q => q.OrderByDescending(c => c.Id),
+        includeProperties: "Documents,Phones"
+        // Repository'da skip/take imkoniyati bo'lsa shuni ishlating
+      );
+
+      // Pagenationni amalga oshirish
+      var pagedData = customers
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .Select(MapToDto);
+
+      return new PagedResponseDto<IEnumerable<CustomerDto>>(pagedData, pageNumber, pageSize, totalRecords);
+    }
+    catch (Exception ex)
+    {
+      var response = new PagedResponseDto<IEnumerable<CustomerDto>>(null, pageNumber, pageSize, 0);
+      response.IsSuccess = false;
+      response.Message = ex.Message;
+      return response;
+    }
+  }
+public async Task<ResponseDto<bool>> TogglePassportLocationAsync(int customerId)
+{
+  var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+  if (customer == null) return ResponseDto<bool>.Fail("Mijoz topilmadi", 404);
+
+  var doc = customer.Documents.FirstOrDefault();
+  if (doc == null) return ResponseDto<bool>.Fail("Hujjat topilmadi", 404);
+
+  // Holatni teskarisiga o'zgartiramiz
+  doc.IsOriginalLeft = !doc.IsOriginalLeft;
+  doc.Status = doc.IsOriginalLeft ? EDocumentStatus.InSafe : EDocumentStatus.Active;
+  doc.LeftAt = doc.IsOriginalLeft ? DateTime.Now : null;
+
+  _unitOfWork.Customers.Update(customer);
+  await _unitOfWork.CompleteAsync();
+
+  return ResponseDto<bool>.Success(doc.IsOriginalLeft, $"Passport joylashuvi: {doc.Status}");
+}
 
   // Yordamchi Mapper
   private CustomerDto MapToDto(Customer c)
@@ -138,8 +203,24 @@ public class CustomerService : ICustomerService
   }
 
   // Boshqa interfeys metodlari (Search, Update...) shu yerda bo'ladi
-  public Task<IEnumerable<CustomerDto>> SearchAsync(string query) => throw new NotImplementedException();
+  public async Task<ResponseDto<IEnumerable<CustomerDto>>> SearchAsync(string query)
+  {
+    if (string.IsNullOrWhiteSpace(query))
+      return ResponseDto<IEnumerable < CustomerDto >>.Success(Enumerable.Empty<CustomerDto>());
+
+    // UnitOfWork orqali repositorydan qidiramiz
+    // AsNoTracking va IQueryable ishlatilgani uchun bu juda tez ishlaydi
+    var customers = await _unitOfWork.Customers.GetAllBoxedAsync(
+      filter: c => c.FirstName.Contains(query) ||
+                   c.LastName.Contains(query) ||
+                   c.JShShIR.Contains(query) ||
+                   c.Documents.Any(d => d.SerialNumber.Contains(query)),
+      includeProperties: "Documents,Phones" // Bog'liqliklarni ham yuklaymiz
+    );
+
+    return ResponseDto<IEnumerable<CustomerDto>>.Success(customers.Select(MapToDto));
+  }
   public Task<CustomerDto> GetByIdAsync(int id) => throw new NotImplementedException();
-  public Task<IEnumerable<CustomerDto>> GetAllAsync() => throw new NotImplementedException();
-  public Task<CustomerDto> UpdateCustomerAsync(int id, CreateCustomerDto dto) => throw new NotImplementedException();
+  public Task<ResponseDto<IEnumerable<CustomerDto>>> GetAllAsync() => throw new NotImplementedException();
+  public Task<ResponseDto<CustomerDto>> UpdateCustomerAsync(int id, CreateCustomerDto dto) => throw new NotImplementedException();
 }

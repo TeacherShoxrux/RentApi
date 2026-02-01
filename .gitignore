@@ -18,6 +18,16 @@
 
 # Mono auto generated files
 mono_crash.*
+# Images
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.webp
+*.svg
+*.ico
+*.db
 
 # Build results
 [Dd]ebug/

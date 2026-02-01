@@ -11,14 +11,14 @@ public class RentalOrder : BaseEntity
     public decimal TotalInitialAmount { get; set; } // Jami dastlabki summa
     public decimal PaidAmount { get; set; }         // To'langan summa
     public decimal DebtAmount { get; set; }         // Qarz summasi
-    public DateTime StartDate { get; set; }
+    public DateTime? StartDate { get; set; }
 
     // Holat
     public EOrderStatus OrderStatus { get; set; } = EOrderStatus.Active;
 
     // --- Tashqi bog'liqliklar (Foreign Keys) ---
     public bool IsManuallyEdited { get; set; } = false;
-    public DateTime ExpectedReturnDate { get; set; }
+    public DateTime? ExpectedReturnDate { get; set; }
     public int CustomerId { get; set; }
     public virtual Customer? Customer{ get; set; } = null!;
     

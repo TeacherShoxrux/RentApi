@@ -18,7 +18,7 @@ public class Customer : BaseEntity
     public string? CreatedByDetail { get; set; }
     public string? Note { get; set; } // "Details" maydoni uchun
 
-    public DateTime DateOfBirth { get; set; }
+    public DateTime? DateOfBirth { get; set; }
     public virtual ICollection<Phone> Phones { get; set; } = new List<Phone>();
     public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
 

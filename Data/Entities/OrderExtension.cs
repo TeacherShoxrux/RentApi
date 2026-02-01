@@ -19,6 +19,6 @@ public class OrderExtension : BaseEntity
   public DateTime EndDate { get; set; }
 
   // Kim uzaytirib berdi? (Admin)
-  public int AdminId { get; set; }
-  // public virtual Admin Admin { get; set; }
+  public string? AdminId { get; set; }
+  public virtual Admin? Admin { get; set; }
 }
