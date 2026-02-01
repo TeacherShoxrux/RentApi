@@ -23,6 +23,7 @@ public class Payment : BaseEntity
     
 
     // Qaysi filial/ombor orqali to'lov qabul qilindi
-    public int WarehouseId { get; set; }
+    public int WareHouseId { get; set; }
+    public virtual WareHouse  WareHouse { get; set; } = null!;
     // public virtual Warehouse Warehouse { get; set; } = null!;
 }

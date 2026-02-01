@@ -16,15 +16,18 @@ public class Equipment : BaseEntity
     public string CreatedBy { get; set; } = string.Empty;
 
     // Bog'liqliklar (Foreign Keys)
-    public int BrandId { get; set; }
+   
     public int CategoryId { get; set; }
-    public int WarehouseId { get; set; }
+    public int WareHouseId { get; set; }
+    public virtual WareHouse WareHouse { get; set; } = null!;
     public int? CustomerId { get; set; } // Hozirda kimdadir bo'lsa
+    public virtual Customer? Customer { get; set; }
     public bool IsAvailable { get; set; } = true;
 
     public virtual ICollection<EquipmentItem> Items { get; set; } = null!;
 
     // Navigatsiya propertylari (EF Core uchun)
+    public int BrandId { get; set; }
     public virtual Brand Brand { get; set; } = null!;
     public virtual Category Category { get; set; } = null!;
     public virtual ICollection<Image> Images { get; set; } = new List<Image>();

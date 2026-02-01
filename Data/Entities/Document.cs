@@ -24,5 +24,6 @@ public class Document : BaseEntity
     
     // Hujjat qaysi mijozga tegishli
     public int CustomerId { get; set; }
+    public virtual Customer Customer { get; set; } = null!;
     // public virtual Customer Customer { get; set; } = null!;
 }
