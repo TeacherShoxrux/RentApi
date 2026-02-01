@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RentApi.Data;
 
@@ -10,9 +11,11 @@ using RentApi.Data;
 namespace RentApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260201180817_initial")]
+    partial class initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -416,13 +419,16 @@ namespace RentApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AdminId")
+                    b.Property<string>("AdminId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("AdminId1")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("EquipmentId")
+                    b.Property<int>("EquipmentId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ImageUrl")
@@ -435,19 +441,14 @@ namespace RentApi.Migrations
                     b.Property<bool>("IsMain")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("RentalOrderId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdminId");
+                    b.HasIndex("AdminId1");
 
                     b.HasIndex("EquipmentId");
-
-                    b.HasIndex("RentalOrderId");
 
                     b.ToTable("Images");
                 });
@@ -549,17 +550,12 @@ namespace RentApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Icon")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
@@ -573,7 +569,7 @@ namespace RentApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("PaymentMethods");
@@ -652,7 +648,7 @@ namespace RentApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AdminId")
+                    b.Property<int>("AdminId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
@@ -685,9 +681,6 @@ namespace RentApi.Migrations
                     b.Property<decimal>("PaidAmount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("PaymentMethodId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("TEXT");
 
@@ -703,7 +696,7 @@ namespace RentApi.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("WareHouseId")
+                    b.Property<int>("WareHouseId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -922,19 +915,17 @@ namespace RentApi.Migrations
                 {
                     b.HasOne("RentApi.Data.Entities.Admin", "Admin")
                         .WithMany()
-                        .HasForeignKey("AdminId");
+                        .HasForeignKey("AdminId1");
 
-                    b.HasOne("RentApi.Data.Entities.Equipment", null)
+                    b.HasOne("RentApi.Data.Entities.Equipment", "Equipment")
                         .WithMany("Images")
-                        .HasForeignKey("EquipmentId");
-
-                    b.HasOne("RentApi.Data.Entities.RentalOrder", "RentalOrder")
-                        .WithMany("Images")
-                        .HasForeignKey("RentalOrderId");
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Admin");
 
-                    b.Navigation("RentalOrder");
+                    b.Navigation("Equipment");
                 });
 
             modelBuilder.Entity("RentApi.Data.Entities.OrderExtension", b =>
@@ -1008,7 +999,9 @@ namespace RentApi.Migrations
                 {
                     b.HasOne("RentApi.Data.Entities.Admin", "Admin")
                         .WithMany()
-                        .HasForeignKey("AdminId");
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("RentApi.Data.Entities.Customer", "Customer")
                         .WithMany("RentalOrders")
@@ -1019,7 +1012,8 @@ namespace RentApi.Migrations
                     b.HasOne("RentApi.Data.Entities.WareHouse", "WareHouse")
                         .WithMany("Orders")
                         .HasForeignKey("WareHouseId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Admin");
 
@@ -1082,8 +1076,6 @@ namespace RentApi.Migrations
 
             modelBuilder.Entity("RentApi.Data.Entities.RentalOrder", b =>
                 {
-                    b.Navigation("Images");
-
                     b.Navigation("Items");
 
                     b.Navigation("Payments");

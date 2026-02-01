@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RentApi.Data;
 
@@ -10,9 +11,11 @@ using RentApi.Data;
 namespace RentApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260201195209_MakeAdminAndWarehouseOptional")]
+    partial class MakeAdminAndWarehouseOptional
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -422,7 +425,7 @@ namespace RentApi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("EquipmentId")
+                    b.Property<int>("EquipmentId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ImageUrl")
@@ -924,15 +927,19 @@ namespace RentApi.Migrations
                         .WithMany()
                         .HasForeignKey("AdminId");
 
-                    b.HasOne("RentApi.Data.Entities.Equipment", null)
+                    b.HasOne("RentApi.Data.Entities.Equipment", "Equipment")
                         .WithMany("Images")
-                        .HasForeignKey("EquipmentId");
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("RentApi.Data.Entities.RentalOrder", "RentalOrder")
                         .WithMany("Images")
                         .HasForeignKey("RentalOrderId");
 
                     b.Navigation("Admin");
+
+                    b.Navigation("Equipment");
 
                     b.Navigation("RentalOrder");
                 });

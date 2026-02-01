@@ -13,6 +13,7 @@ public class CreateEquipmentDto
   [Required(ErrorMessage = "Kategoriyani tanlang")]
   public int CategoryId { get; set; }
 
+  public int Quantity { get; set; }=1; // Mahsulot soni
   public string? Model { get; set; } // UI dagi Model yoki SKU uchun
 
   public string? Description { get; set; } // Mahsulot haqida batafsil
@@ -26,8 +27,6 @@ public class CreateEquipmentDto
   // --- UI dagi Qo'shimcha parametrlar ---
 
   public bool IsMainProduct { get; set; } = true; // Asosiy mahsulot yoki Qo'shimcha
-
-  public bool RequiresInsurance { get; set; } = false; // Sug'urta talab etilishi
 
   public bool HasAccessories { get; set; } = false; // Aksessuarlar mavjudligi
 

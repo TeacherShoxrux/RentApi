@@ -170,7 +170,7 @@ public class AppDbContext : DbContext
             .Property(a => a.Role)
             .HasConversion<string>();
         modelBuilder.Entity<PaymentMethod>()
-            .HasIndex(p => p.Code)
+            .HasIndex(p => p.Name)
             .IsUnique();
 
         modelBuilder.Entity<Brand>()

@@ -27,7 +27,12 @@ mono_crash.*
 *.webp
 *.svg
 *.ico
+
+# SQLite database
 *.db
+*.sqlite
+*.sqlite3
+
 
 # Build results
 [Dd]ebug/

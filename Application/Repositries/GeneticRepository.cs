@@ -32,9 +32,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     return await dbSet.Where(expression).ToListAsync();
   }
 
-  public async Task AddAsync(T entity)
+  public async Task<T> AddAsync(T entity)
   {
     await dbSet.AddAsync(entity);
+    return entity;
   }
 
   public async Task AddRangeAsync(IEnumerable<T> entities)

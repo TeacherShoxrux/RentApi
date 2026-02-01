@@ -17,7 +17,7 @@ public interface IGenericRepository<T> where T : BaseEntity
   Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression);
 
   // 4. Qo'shish
-  Task AddAsync(T entity);
+  Task<T> AddAsync(T entity);
   Task AddRangeAsync(IEnumerable<T> entities);
 
   // 5. O'chirish

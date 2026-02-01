@@ -8,10 +8,9 @@ public class Image : BaseEntity
     public bool IsMain { get; set; }
 
     // Tashqi bog'liqlik (Uskuna bilan bog'lash)
-    public int EquipmentId { get; set; }
-    public string? AdminId { get; set; }
+    public int? RentalOrderId { get; set; }
+    public virtual RentalOrder? RentalOrder { get; set; }
+    public int? AdminId { get; set; }
 
     public virtual Admin? Admin { get; set; }
-    // Navigatsiya property
-    public virtual Equipment Equipment { get; set; } = null!;
 }

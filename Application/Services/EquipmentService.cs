@@ -102,6 +102,7 @@ public class EquipmentService : IEquipmentService
    if (brandExists == null || catExists == null)
      return ResponseDto<int>.Fail("Brend yoki Kategoriya xato!");
 
+    
    var equipment = new Equipment
    {
      Name = dto.Name,
@@ -110,7 +111,9 @@ public class EquipmentService : IEquipmentService
      PricePerDay = dto.PricePerDay,
      ReplacementValue = dto.ReplacementValue,
      Model = dto.Model,
-     Details = dto.Description
+     Details = dto.Description,
+    IsMainProduct = dto.IsMainProduct,
+
    };
 
    // Rasmlarni yuklash
@@ -122,8 +125,22 @@ public class EquipmentService : IEquipmentService
        equipment.Images.Add(new Image { ImageUrl = path });
      }
    }
+   var e= await _unitOfWork.Equipments.AddAsync(equipment);
+   await _unitOfWork.CompleteAsync();
+  List<EquipmentItem> items = new List<EquipmentItem>();
+  for (int i = 0; i < dto.Quantity; i++)
+  {
+    items.Add(new EquipmentItem
+    {
+      Status = EEquipmentItemStatus.Available,
+      Condition = "Yangi",
+      SerialNumber = Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+      WareHouseId = e.WareHouseId,
+      EquipmentId=e.Id // Default ombor
+    });
+  }
+   await _unitOfWork.Repository<EquipmentItem>().AddRangeAsync(items);
 
-   await _unitOfWork.Equipments.AddAsync(equipment);
    await _unitOfWork.CompleteAsync();
 
    return ResponseDto<int>.Success(equipment.Id, "Texnika katalogga qo'shildi");

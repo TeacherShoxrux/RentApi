@@ -2,6 +2,7 @@ namespace RentApi.Data.Entities;
 
 public class RentalOrder : BaseEntity
 {
+    public int PaymentMethodId { get; set; }
     // Vaqt va muddat
     public DateTime OrderDate { get; set; } = DateTime.UtcNow;
     public int TotalDays { get; set; }
@@ -11,26 +12,26 @@ public class RentalOrder : BaseEntity
     public decimal TotalInitialAmount { get; set; } // Jami dastlabki summa
     public decimal PaidAmount { get; set; }         // To'langan summa
     public decimal DebtAmount { get; set; }         // Qarz summasi
-    public DateTime? StartDate { get; set; }
+    public DateTime StartDate { get; set; }
+
 
     // Holat
     public EOrderStatus OrderStatus { get; set; } = EOrderStatus.Active;
 
     // --- Tashqi bog'liqliklar (Foreign Keys) ---
     public bool IsManuallyEdited { get; set; } = false;
-    public DateTime? ExpectedReturnDate { get; set; }
+    public DateTime ExpectedReturnDate { get; set; }
     public int CustomerId { get; set; }
     public virtual Customer? Customer{ get; set; } = null!;
     
-    public int WareHouseId { get; set; }
+    public int? WareHouseId { get; set; }
     public virtual WareHouse? WareHouse{ get; set; } = null!;
     
     // Xodimlar (Staff va Adminlar odatda User jadvaliga bog'lanadi)
-    public int AdminId { get; set; }
+    public int? AdminId { get; set; }
     public virtual Admin? Admin { get; set; } = null!;
-    public double TotalShifts { get; set; }
-    // public virtual Customer Customer { get; set; } = null!;
-    // public virtual Warehouse Warehouse { get; set; } = null!;
+    public double TotalShifts { get; set; } = 0;
+    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     public virtual ICollection<RentalOrderItem> Items { get; set; } = new List<RentalOrderItem>();
   

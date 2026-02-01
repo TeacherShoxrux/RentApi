@@ -5,7 +5,7 @@ public class Equipment : BaseEntity
     // Asosiy ma'lumotlar
     public string Name { get; set; } = string.Empty;
     public string? Model { get; set; } = string.Empty;
-    public string? Type { get; set; }
+    public bool? IsMainProduct { get; set; }
     public string? Details { get; set; }
 
     // Narxlar
