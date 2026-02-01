@@ -14,7 +14,7 @@ public class EquipmentItem : BaseEntity
     // Qaysi turdagi uskunaga tegishli ekanligi
     public int EquipmentId { get; set; }
     public virtual Equipment Equipment { get; set; } = null!;
-
+    public string? Condition { get; set; }
     // Qaysi omborda turganligi
     public int WareHouseId { get; set; }
     public virtual WareHouse WareHouse { get; set; } = null!;

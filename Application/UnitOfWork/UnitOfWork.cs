@@ -15,7 +15,7 @@ public class UnitOfWork : IUnitOfWork
   private IRentalOrderRepository? _rentalOrders;
   private ICustomerRepository? _customers;
   private IAdminRepository? _admins;
-  private IWareHouseRepository? _warehouses;
+  private IWareHouseRepository? _wareHouses;
 
   public UnitOfWork(AppDbContext context)
   {
@@ -38,8 +38,8 @@ public class UnitOfWork : IUnitOfWork
   public IAdminRepository Admins =>
     _admins ??= new AdminRepository(_context);
 
-  public IWareHouseRepository Warehouses =>
-    _warehouses ??= new WarehouseRepository(_context);
+  public IWareHouseRepository WareHouses =>
+    _wareHouses ??= new WarehouseRepository(_context);
 
   public async Task<int> CompleteAsync()
   {

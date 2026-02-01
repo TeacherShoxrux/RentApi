@@ -30,6 +30,7 @@ public class AppDbContext : DbContext
     public DbSet<OrderExtension> OrderExtensions { get; set; }
     // --- 5. Moliya ---
     public DbSet<Payment> Payments { get; set; }
+    public DbSet<WareHouse> WareHouses { get; set; }
     public DbSet<PaymentMethod> PaymentMethods { get; set; }
 
     // --- 6. Admin ---

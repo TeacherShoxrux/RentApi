@@ -13,7 +13,8 @@ public class Admin : BaseEntity
     public string? Phone { get; set; }
     public string? Image { get; set; }
     public string? Details { get; set; }
-
+    public bool IsActive{ get; set; }=true;
+    
     // Xavfsizlik va kirish huquqlari
     public AdminRole Role { get; set; } // Masalan: "SuperAdmin", "Manager"
     public string? Permission { get; set; }      // Ruxsatlar (JSON yoki string formatda)

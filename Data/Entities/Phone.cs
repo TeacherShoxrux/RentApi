@@ -12,7 +12,7 @@ public class Phone : BaseEntity
     
     // Raqam qaysi mijozga tegishli
     public int CustomerId { get; set; }
-    
+    public virtual Customer Customer { get; set; } = null!;
     // Navigatsiya property (ixtiyoriy, Customer yaratilgach ishlatish mumkin)
     // public virtual Customer Customer { get; set; } = null!;
 }
