@@ -16,7 +16,7 @@ public class EquipmentItem : BaseEntity
     public virtual Equipment Equipment { get; set; } = null!;
 
     // Qaysi omborda turganligi
-    public int WarehouseId { get; set; }
-    public virtual WareHouse Warehouse { get; set; } = null!;
+    public int WareHouseId { get; set; }
+    public virtual WareHouse WareHouse { get; set; } = null!;
     public virtual ICollection<RentalOrderItem> RentalHistory { get; set; } = new List<RentalOrderItem>();
 }

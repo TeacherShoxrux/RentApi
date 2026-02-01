@@ -22,10 +22,9 @@ public class RentalOrder : BaseEntity
     public virtual Customer Customer{ get; set; } = null!;
     
     public int WareHouseId { get; set; }
-    public virtual WareHouse Warehouse{ get; set; } = null!;
-
+    public virtual WareHouse WareHouse{ get; set; } = null!;
+    
     // Xodimlar (Staff va Adminlar odatda User jadvaliga bog'lanadi)
-    public int StaffId { get; set; }
     public int AdminId { get; set; }
     public virtual Admin Admin { get; set; } = null!;
     public double TotalShifts { get; set; }

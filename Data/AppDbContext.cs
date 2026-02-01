@@ -71,7 +71,7 @@ public class AppDbContext : DbContext
             .WithMany(e => e.Items)
             .HasForeignKey(ei => ei.EquipmentId)
             .OnDelete(DeleteBehavior.Restrict);
-
+        
         // 3. Status -> EquipmentItem (YANGI HIMOYA - Lookup Table)
         // "Available" statusi o'chsa, uskunalar buzilmasin.
         modelBuilder.Entity<EquipmentItem>()
@@ -138,9 +138,25 @@ public class AppDbContext : DbContext
             .HasForeignKey(p => p.RentalOrderId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // =========================================================
-        //                 UNIQUE INDEXES (TAKRORLANMASLIK)
-        // =========================================================
+        modelBuilder.Entity<EquipmentItem>()
+            .HasOne(ei => ei.WareHouse)
+            .WithMany(w => w.Items)
+            .HasForeignKey(ei => ei.WareHouseId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // 2. Warehouse -> Admin (Ombor yopilsa, xodimlar ko'chada qolmasin)
+        modelBuilder.Entity<Admin>()
+            .HasOne(a => a.WareHouse)
+            .WithMany(w => w.Admins)
+            .HasForeignKey(a => a.WarehouseId)
+            .OnDelete(DeleteBehavior.SetNull); // Ombor o'chsa, xodim "Omborsiz" holatga tushadi
+
+        // 3. Warehouse -> Orders (Hisobot buzilmasligi uchun)
+        modelBuilder.Entity<RentalOrder>()
+            .HasOne(ro => ro.WareHouse)
+            .WithMany(w => w.Orders)
+            .HasForeignKey(ro => ro.WareHouseId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<EquipmentItem>()
             .HasIndex(ei => ei.SerialNumber)
@@ -149,7 +165,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Customer>()
             .HasIndex(c => c.JShShIR)
             .IsUnique();
-
+        modelBuilder.Entity<Admin>()
+            .Property(a => a.Role)
+            .HasConversion<string>();
         modelBuilder.Entity<PaymentMethod>()
             .HasIndex(p => p.Code)
             .IsUnique();
