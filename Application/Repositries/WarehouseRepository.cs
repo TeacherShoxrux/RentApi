@@ -14,7 +14,6 @@ public class WarehouseRepository : GenericRepository<WareHouse>, IWareHouseRepos
   {
     var items = _context.EquipmentItems.AsNoTracking().Where(i => i.WareHouseId == wId);
     var count = await items.CountAsync();
-    // Price Equipment ichida deb hisoblaymiz
     var value = await items.SumAsync(i => i.Equipment.PricePerDay);
     return (count, value);
   }

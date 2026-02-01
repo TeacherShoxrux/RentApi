@@ -8,7 +8,7 @@ public interface IUnitOfWork : IDisposable
   IRentalOrderRepository RentalOrders { get; }
   ICustomerRepository Customers { get; }
   IAdminRepository Admins { get; }
-  IWarehouseRepository Warehouses { get; }
+  IWareHouseRepository Warehouses { get; }
 
   Task<int> CompleteAsync();
 }
