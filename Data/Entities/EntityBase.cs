@@ -1,4 +1,4 @@
-namespace Namespace.Data.Entities
+namespace RentApi.Data.Entities;
 public abstract class BaseEntity
 {
     public int Id { get; set; }

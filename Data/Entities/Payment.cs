@@ -15,10 +15,12 @@ public class Payment : BaseEntity
 
     // Qaysi ijara buyurtmasi uchun to'lov qilindi
     public int RentalOrderId { get; set; }
+    public virtual RentalOrder RentalOrder { get; set; } = null!;
 
     // To'lov usuli (Naqd, Karta va h.k.)
     public int PaymentMethodId { get; set; }
     public virtual PaymentMethod PaymentMethod { get; set; } = null!;
+    
 
     // Qaysi filial/ombor orqali to'lov qabul qilindi
     public int WarehouseId { get; set; }

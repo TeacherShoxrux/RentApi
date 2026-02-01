@@ -6,7 +6,7 @@ public class EquipmentItem : BaseEntity
     public string SerialNumber { get; set; } = string.Empty;
 
     // Hozirgi holati: "Available", "Rented", "Repairing", "Lost"
-    public EEquipmentStatus Status { get; set; };
+    public EEquipmentItemStatus Status { get; set; }= EEquipmentItemStatus.Available;
 
     // Necha marta ijaraga berilganligi (eskirishini kuzatish uchun)
     public int UsageCount { get; set; }
@@ -17,5 +17,6 @@ public class EquipmentItem : BaseEntity
 
     // Qaysi omborda turganligi
     public int WarehouseId { get; set; }
-    public virtual Warehouse Warehouse { get; set; } = null!;
+    public virtual WareHouse Warehouse { get; set; } = null!;
+    public virtual ICollection<RentalOrderItem> RentalHistory { get; set; } = new List<RentalOrderItem>();
 }

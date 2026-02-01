@@ -1,4 +1,4 @@
-public enum EEquipmentStatus
+public enum EEquipmentItemStatus
 {
     Available = 1,
     Rented = 2,

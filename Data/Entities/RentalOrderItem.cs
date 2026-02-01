@@ -17,6 +17,7 @@ public class RentalOrderItem : BaseEntity
 
     // Bu uskuna qaytarildimi? (Chunki bitta buyurtmadagi narsalar har xil vaqtda qaytishi mumkin)
     public bool IsReturned { get; set; } = false;
+ 
     
     // Qaytarilgan vaqt
     public DateTime? ReturnedAt { get; set; }

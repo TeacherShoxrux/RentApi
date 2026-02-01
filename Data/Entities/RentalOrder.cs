@@ -16,17 +16,23 @@ public class RentalOrder : BaseEntity
     public string OrderStatus { get; set; } = "Pending";
 
     // --- Tashqi bog'liqliklar (Foreign Keys) ---
-
+    public bool IsManuallyEdited { get; set; } = false;
+    public DateTime ExpectedReturnDate { get; set; }
     public int CustomerId { get; set; }
-    public int WareHouseId { get; set; }
+    public virtual Customer Customer{ get; set; } = null!;
     
+    public int WareHouseId { get; set; }
+    public virtual WareHouse Warehouse{ get; set; } = null!;
+
     // Xodimlar (Staff va Adminlar odatda User jadvaliga bog'lanadi)
     public int StaffId { get; set; }
     public int AdminId { get; set; }
-
+    public virtual Admin Admin { get; set; } = null!;
+    public double TotalShifts { get; set; }
     // --- Navigatsiya propertylari ---
     // public virtual Customer Customer { get; set; } = null!;
     // public virtual Warehouse Warehouse { get; set; } = null!;
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     public virtual ICollection<RentalOrderItem> Items { get; set; } = new List<RentalOrderItem>();
+  
 }

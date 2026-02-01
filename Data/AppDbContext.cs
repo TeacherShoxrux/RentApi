@@ -5,54 +5,56 @@ namespace RentApi.Data;
 
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
 
-    // --- 1. Katalog (Catalog) ---
+    // --- 1. Katalog ---
     public DbSet<Brand> Brands { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Equipment> Equipments { get; set; }
     public DbSet<Image> Images { get; set; }
 
-    // --- 2. Inventar (Inventory) ---
+    // --- 2. Inventar ---
     public DbSet<EquipmentItem> EquipmentItems { get; set; }
-    public DbSet<Status> Statuses { get; set; }
 
-    // --- 3. Mijozlar (Customers) ---
+    // --- 3. Mijozlar ---
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Phone> Phones { get; set; }
     public DbSet<Document> Documents { get; set; }
 
-    // --- 4. Tranzaksiya va Buyurtmalar (Transactions) ---
+    // --- 4. Tranzaksiya ---
     public DbSet<RentalOrder> RentalOrders { get; set; }
-    public DbSet<RentalOrderItem> RentalOrderItems { get; set; } // Biz qo'shgan ko'prik jadval
+    public DbSet<RentalOrderItem> RentalOrderItems { get; set; }
     public DbSet<RentPhoto> RentPhotos { get; set; }
-
-    // --- 5. Moliya (Finance) ---
+    public DbSet<OrderExtension> OrderExtensions { get; set; }
+    // --- 5. Moliya ---
     public DbSet<Payment> Payments { get; set; }
     public DbSet<PaymentMethod> PaymentMethods { get; set; }
 
-    // --- 6. Boshqaruv (Admin) ---
+    // --- 6. Admin ---
     public DbSet<Admin> Admins { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // --- A. PULLIK MAYDONLAR (DECIMAL PRECISION) ---
-        // SQL Serverda decimal tiplar aniqlik talab qiladi (18 ta raqam, shundan 2 tasi tiyin)
+        // --- A. DECIMAL SOZLAMALARI ---
         foreach (var property in modelBuilder.Model.GetEntityTypes()
-            .SelectMany(t => t.GetProperties())
-            .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
+                     .SelectMany(t => t.GetProperties())
+                     .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
         {
             property.SetColumnType("decimal(18,2)");
         }
 
-        // --- B. BOG'LIQLIKLAR VA O'CHIRISH QOIDALARI (RELATIONSHIPS) ---
+        // =========================================================
+        //                 BOG'LIQLIKLAR (RELATIONSHIPS)
+        // =========================================================
 
-        // 1. Brand va Category o'chirilganda, Uskunalar o'chib ketmasin (Xavfsizlik)
+        // 1. Brand/Category -> Equipment (HIMOYA)
         modelBuilder.Entity<Equipment>()
             .HasOne(e => e.Brand)
-            .WithMany(b => b.Equipments) // Brand modelida ICollection<Equipment> bo'lishi kerak
+            .WithMany(b => b.Equipments)
             .HasForeignKey(e => e.BrandId)
             .OnDelete(DeleteBehavior.Restrict);
 
@@ -62,51 +64,102 @@ public class AppDbContext : DbContext
             .HasForeignKey(e => e.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // 2. RentalOrder va Items (Ko'prik jadval)
-        modelBuilder.Entity<RentalOrderItem>()
-            .HasOne(roi => roi.RentalOrder)
-            .WithMany(ro => ro.Items)
-            .HasForeignKey(roi => roi.RentalOrderId)
-            .OnDelete(DeleteBehavior.Cascade); // Buyurtma o'chsa, ichidagi qatorlar ham o'chadi
-
-        // 3. EquipmentItem va RentalHistory (ENG MUHIMI)
-        // Uskuna o'chirilganda, tarix (RentalOrderItem) o'chib ketmasligi shart!
-        modelBuilder.Entity<RentalOrderItem>()
-            .HasOne(roi => roi.EquipmentItem)
-            .WithMany(ei => ei.RentalHistory)
-            .HasForeignKey(roi => roi.EquipmentItemId)
+        // 2. Equipment -> EquipmentItem (YANGI HIMOYA)
+        // Katalogdan "Drel" o'chsa, ombordagi "Drel SN-001" o'chib ketmasin.
+        modelBuilder.Entity<EquipmentItem>()
+            .HasOne(ei => ei.Equipment)
+            .WithMany(e => e.Items)
+            .HasForeignKey(ei => ei.EquipmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // 4. Mijoz va Buyurtmalar
-        // Mijoz o'chsa, uning qarzlari va buyurtmalari o'chib ketmasin
+        // 3. Status -> EquipmentItem (YANGI HIMOYA - Lookup Table)
+        // "Available" statusi o'chsa, uskunalar buzilmasin.
+        modelBuilder.Entity<EquipmentItem>()
+                .Property(e => e.Status)
+                .HasConversion<string>();
+        
+        modelBuilder.Entity<OrderExtension>()
+            .HasOne(oe => oe.RentalOrder)
+            .WithMany() // Buyurtma ichida Extensions ro'yxati bo'lmasa ham bo'ladi
+            .HasForeignKey(oe => oe.RentalOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+        // 4. Customer -> Phone/Document (TOZALASH)
+        // Mijoz o'chsa, uning telefoni va hujjati bazadan o'chib ketsin (Cascade).
+        modelBuilder.Entity<Phone>()
+            .HasOne<Customer>() // Customer navigation property bo'lmasa ham ishlaydi
+            .WithMany(c => c.Phones)
+            .HasForeignKey(p => p.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Document>()
+            .HasOne<Customer>()
+            .WithMany(c => c.Documents)
+            .HasForeignKey(d => d.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // 5. Customer -> RentalOrder (HIMOYA)
+        // Qarzi bor yoki tarixi bor mijozni o'chirish mumkin emas.
         modelBuilder.Entity<RentalOrder>()
             .HasOne(ro => ro.Customer)
             .WithMany(c => c.RentalOrders)
             .HasForeignKey(ro => ro.CustomerId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // 5. To'lovlar
+        // 6. RentalOrder -> RentalOrderItem (ORDER ICHIDAGI NARSA)
+        // Buyurtma o'chsa, ichidagi ro'yxat o'chishi kerak.
+        modelBuilder.Entity<RentalOrderItem>()
+            .HasOne(roi => roi.RentalOrder)
+            .WithMany(ro => ro.Items)
+            .HasForeignKey(roi => roi.RentalOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // 7. EquipmentItem -> RentalOrderItem (TARIXNI SAQLASH - ENG MUHIMI)
+        // Uskuna o'chsa, tarix o'chmasin.
+        modelBuilder.Entity<RentalOrderItem>()
+            .HasOne(roi => roi.EquipmentItem)
+            .WithMany(ei => ei.RentalHistory)
+            .HasForeignKey(roi => roi.EquipmentItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // 8. PaymentMethod -> Payment (YANGI HIMOYA - Lookup Table)
+        // "Naqd" o'chsa, to'lovlar o'chmasin.
+        modelBuilder.Entity<Payment>()
+            .HasOne(p => p.PaymentMethod)
+            .WithMany() // PaymentMethod ichida Collection bo'lmasa bo'sh qoldiramiz
+            .HasForeignKey(p => p.PaymentMethodId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // 9. RentalOrder -> Payment (MOLIYAVIY XAVFSIZLIK - O'ZGARTIRILDI)
+        // Tavsiya: Agar to'lov bo'lgan bo'lsa, buyurtmani o'chirishni taqiqlash (Restrict).
+        // Agar Cascade qilsangiz, kassir buyurtmani o'chirsangiz, pul ham "g'oyib" bo'ladi.
         modelBuilder.Entity<Payment>()
             .HasOne(p => p.RentalOrder)
             .WithMany(ro => ro.Payments)
             .HasForeignKey(p => p.RentalOrderId)
-            .OnDelete(DeleteBehavior.Cascade); // Buyurtma o'chsa, to'lovlar tarixi o'chishiga ruxsat berilishi mumkin (yoki Restrict qilsa ham bo'ladi)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        // --- C. UNIQUE INDEXES (Takrorlanmaslik) ---
+        // =========================================================
+        //                 UNIQUE INDEXES (TAKRORLANMASLIK)
+        // =========================================================
+
         modelBuilder.Entity<EquipmentItem>()
             .HasIndex(ei => ei.SerialNumber)
-            .IsUnique(); // Bir xil seriya raqamli uskuna bo'lmasligi kerak
+            .IsUnique();
 
         modelBuilder.Entity<Customer>()
             .HasIndex(c => c.JShShIR)
-            .IsUnique(); // Bir xil PINFL li odam ikki marta kiritilmasin
-            
+            .IsUnique();
+
         modelBuilder.Entity<PaymentMethod>()
             .HasIndex(p => p.Code)
             .IsUnique();
+
+        modelBuilder.Entity<Brand>()
+            .HasIndex(b => b.Name)
+            .IsUnique(); // Bir xil nomli brend bo'lmasin
     }
 
-    // --- D. AUDIT (Created/Updated Time) ---
+    // --- AUDIT ---
     public override int SaveChanges()
     {
         UpdateAuditFields();
@@ -122,7 +175,7 @@ public class AppDbContext : DbContext
     private void UpdateAuditFields()
     {
         var entries = ChangeTracker.Entries()
-            .Where(e => e.Entity is BaseEntity && 
+            .Where(e => e.Entity is BaseEntity &&
                         (e.State == EntityState.Added || e.State == EntityState.Modified));
 
         foreach (var entry in entries)
@@ -133,6 +186,7 @@ public class AppDbContext : DbContext
             {
                 entity.CreatedAt = DateTime.UtcNow;
             }
+
             entity.UpdatedAt = DateTime.UtcNow;
         }
     }

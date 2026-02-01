@@ -20,6 +20,9 @@ public class Equipment : BaseEntity
     public int CategoryId { get; set; }
     public int WarehouseId { get; set; }
     public int? CustomerId { get; set; } // Hozirda kimdadir bo'lsa
+    public bool IsAvailable { get; set; } = true;
+
+    public virtual ICollection<EquipmentItem> Items { get; set; } = null!;
 
     // Navigatsiya propertylari (EF Core uchun)
     public virtual Brand Brand { get; set; } = null!;

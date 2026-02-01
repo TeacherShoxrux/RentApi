@@ -1,4 +1,7 @@
-namespace Data.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace RentApi.Data.Entities;
 public class Category : BaseEntity
     {
         [Required(ErrorMessage = "Kategoriya nomi kiritilishi shart")]
@@ -22,4 +25,6 @@ public class Category : BaseEntity
 
         [ForeignKey("BrandId")]
         public virtual Brand Brand { get; set; } // Navigatsiya property
+        public virtual ICollection<Equipment> Equipments { get; set; } = new List<Equipment>();
+
     }
