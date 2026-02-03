@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using RentApi.Application.DTOs.RentalOrder;
 using RentApi.Application.Services.Interfaceses;
 
-namespace RentApi.API.Controllers;
+namespace RentApi.Controllers;
 
 [Route("api/[controller]")]
 public class RentalsController : ControllerBase
@@ -25,5 +25,17 @@ public class RentalsController : ControllerBase
   {
     var result = await _service.GetPagedOrdersAsync(filter);
     return Ok(result);
+  }
+  [HttpGet("get-rentals")]  
+  public async Task<IActionResult> GetRentalsL([FromQuery] string? search)
+  {
+    var rentals = await _service.GetActiveRentalsAsync(search);
+    return Ok(rentals);
+  }
+  [HttpGet("get-details/{orderId}")]
+  public async Task<IActionResult> GetRentals(int orderId)
+  {
+    var rental = await _service.GetOrderDetailsAsync(orderId);
+    return Ok(rental);
   }
 }

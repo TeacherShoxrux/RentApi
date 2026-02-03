@@ -1,4 +1,6 @@
 using System.Linq.Expressions;
+using Application.DTOs.RentalOrder;
+using Microsoft.EntityFrameworkCore;
 using RentApi.Application.DTOs;
 using RentApi.Application.DTOs.RentalOrder;
 using RentApi.Application.Services.Interfaceses;
@@ -141,7 +143,7 @@ public class RentalService: IRentalService
          (order.Customer.Phones.Any(p => p.PhoneNumber.Contains(filter.Search))));
 
       // 2. Umumiy sonini olish (Pagination uchun)
-      var totalRecords = (await _uow.RentalOrders.FindAsync(predicate)).Count();
+      var totalRecords = ( _uow.RentalOrders.FindAsync(predicate)).Count();
 
       // 3. Ma'lumotlarni yuklash (Include Customer)
       var orders = await _uow.RentalOrders.GetAllBoxedAsync(
@@ -189,6 +191,60 @@ public class RentalService: IRentalService
         Message = ex.Message
       };
     }
+  }
+
+  
+  public Task<PagedResponseDto<List<RentalOrderDto>>> GetActiveRentalsAsync(string? searchTerm)
+  {
+    // var query = _uow.Repository<RentalOrder>()
+    //   .FindAsync(o => o.OrderStatus == EOrderStatus.Active);
+
+    // // Agar qidiruv so'zi yuborilgan bo'lsa
+    // if (!string.IsNullOrWhiteSpace(searchTerm))
+    // {
+    //   searchTerm = searchTerm.ToLower(); // Kichik harflarga o'tkazamiz
+
+    //   query = query.Where(o =>o.Customer?.FirstName.ToLower().Contains(searchTerm) || o?.Customer?.LastName.Contains(searchTerm));
+    // }
+
+    // return await query
+    //   .Select(o => new RentalOrderListDto
+    //   {
+    //     OrderId = o.Id,
+    //     CustomerName = o.Customer.FullName,
+    //     PhoneNumber = o.Customer.Phone,
+    //     RentalDate = o.CreatedAt,
+    //     Status = o.Status
+    //   })
+    //   .ToListAsync();
+    throw new NotImplementedException();
+  }
+
+  public async Task<ResponseDto<RentalOrderDetailDto>> GetOrderDetailsAsync(int orderId)
+  {
+    var order = await _uow.Repository<RentalOrder>().GetAllAsync()    
+      .Include(o => o.Items)
+      .Include(o => o.Customer)
+      .FirstOrDefaultAsync(o => o.Id == orderId);
+
+    if (order == null) return null;
+
+    return ResponseDto<RentalOrderDetailDto>.Success( new RentalOrderDetailDto
+    {
+      OrderId = order.Id,
+      CustomerName = order?.Customer.FirstName + " " + order?.Customer.LastName,
+      StartDate = order.StartDate,
+      TotalAmount = order.Items.Sum(i => i.PriceAtMoment), // Smena logikasi bu yerga qo'shiladi
+      PaidAmount = order.PaidAmount,
+      Items = order.Items.Select(i => new RentalItemDto
+      {
+        ItemId = i.Id,
+        EquipmentName = i.EquipmentItem.Equipment.Name,
+        Price = i.PriceAtMoment,
+        Quantity =1,
+        IsReturned = i.IsReturned
+      }).ToList()
+    },"Buyurtma tafsilotlari yuklandi.");
   }
 
 // Yordamchi metod: Kunlar farqini chiroyli ko'rsatish

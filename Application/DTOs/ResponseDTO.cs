@@ -1,3 +1,5 @@
+using Application.DTOs.RentalOrder;
+
 namespace RentApi.Application.DTOs;
 
 public class ResponseDto<T>

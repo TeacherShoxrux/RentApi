@@ -32,7 +32,7 @@ public class EquipmentService : IEquipmentService
         (string.IsNullOrEmpty(filter.SearchTerm) || e.Name.Contains(filter.SearchTerm));
 
       // 2. Jami sonini hisoblash
-      var totalRecords = (await _unitOfWork.Equipments.FindAsync(predicate)).Count();
+      var totalRecords = ( _unitOfWork.Equipments.FindAsync(predicate)).Count();
 
       // 3. Ma'lumotlarni yuklash (Performance uchun AsNoTracking ishlatiladi)
       var equipments = await _unitOfWork.Equipments.GetAllBoxedAsync(

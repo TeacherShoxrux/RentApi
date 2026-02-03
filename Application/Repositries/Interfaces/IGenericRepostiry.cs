@@ -11,10 +11,10 @@ public interface IGenericRepository<T> where T : BaseEntity
   Task<T?> GetByIdAsync(int id);
 
   // 2. Barchasini olish (Ro'yxat)
-  Task<IEnumerable<T>> GetAllAsync();
+  IQueryable<T> GetAllAsync();
 
   // 3. Shart bo'yicha qidirish (Masalan: faqat "Available" bo'lganlar)
-  Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression);
+  IQueryable<T> FindAsync(Expression<Func<T, bool>> expression);
 
   // 4. Qo'shish
   Task<T> AddAsync(T entity);

@@ -136,8 +136,9 @@ public class CustomerService : ICustomerService
         c.LastName.Contains(searchTerm) ||
         c.JShShIR.Contains(searchTerm);
 
-      // 2. Jami yozuvlar sonini olish (Pagenation uchun)
-      var totalRecords = (await _unitOfWork.Customers.FindAsync(filter)).Count();
+      // 2. Jami yozuvlar sonin
+      // i olish (Pagenation uchun)
+      var totalRecords = ( _unitOfWork.Customers.FindAsync(filter)).Count();
 
       // 3. Ma'lumotlarni qismlarga bo'lib olish (Skip & Take)
       var customers = await _unitOfWork.Customers.GetAllBoxedAsync(
