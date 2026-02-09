@@ -37,9 +37,9 @@ public static class DbSeeder
 
         var admin = new Admin
         {
-          Name = "Super",
+          FirstName = "Super",
           LastName = "Admin",
-          Role = AdminRole.SuperAdmin, // Enum
+          Role = EAdminRole.SuperAdmin, // Enum
           DateOfBirth = new DateTime(1995, 1, 1),
 
           // MUHIM: "1111" ni hashlab yozamiz

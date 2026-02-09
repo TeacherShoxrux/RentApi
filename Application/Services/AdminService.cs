@@ -17,11 +17,11 @@ public class AdminService : IAdminService
         _unitOfWork = unitOfWork;
         _env = env;
     }
-    public Task<ResponseDto<AdminDto>> CreateAsync(AdminCreateDto createDto)
+    public async Task<ResponseDto<AdminDto>> CreateAsync(AdminCreateDto createDto)
     {
         try
         {
-            var existingAdmin = _unitOfWork.Admins.AddAsync(new Admin
+            var existingAdmin =await _unitOfWork.Admins.AddAsync(new Admin
             {
                 FirstName = createDto.FirstName,
                 LastName = createDto.LastName,
@@ -32,14 +32,21 @@ public class AdminService : IAdminService
                 Role = EAdminRole.Manager,
                 CreatedAt = DateTime.UtcNow
             });
-
+          await _unitOfWork.CompleteAsync();
+            return ResponseDto<AdminDto>.Success(new AdminDto
+            {
+                Id = existingAdmin.Id,
+                FullName = $"{existingAdmin.FirstName} {existingAdmin.LastName}",
+                RoleName = existingAdmin.Role.ToString(),
+                PhoneNumber = existingAdmin.Phone,
+                BirthDate = existingAdmin.DateOfBirth
+            });
         }
         catch (System.Exception)
         {
-
-            throw;
+            return ResponseDto<AdminDto>.Fail("Admin yaratishda xatolik yuz berdi.");
         }
-        throw new NotImplementedException();
+       
     }
 
     public Task<ResponseDto<AdminDto>> GetByIdAsync(int id)
