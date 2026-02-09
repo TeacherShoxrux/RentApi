@@ -1,3 +1,5 @@
+using Application.DTOs.Employee;
+using RentApi.Application.DTOs;
 using RentApi.Data.Entities;
 
 namespace RentApi.Application.Repositries.Interfaces;
@@ -9,4 +11,6 @@ public interface IAdminRepository : IGenericRepository<Admin>
 
   // Ma'lum bir omborda ishlaydigan xodimlarni olish
   Task<IEnumerable<Admin>> GetByWarehouseAsync(int warehouseId);
+  
+
 }
