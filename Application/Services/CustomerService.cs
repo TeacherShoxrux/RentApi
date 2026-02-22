@@ -21,7 +21,7 @@ public class CustomerService : ICustomerService
   public async Task<ResponseDto<CustomerDto>> CreateCustomerAsync(CreateCustomerDto dto)
   {
     try{
-    var existing = await _unitOfWork.Customers.GetByDocumentAsync(dto.JShShIR);
+    var existing = await _unitOfWork.Customers.GetByDocumentAsync(dto.JShShIR!);
     if (existing != null)
       throw new Exception($"Bu JSHSHIR ({dto.JShShIR}) bilan mijoz allaqachon mavjud!");
 

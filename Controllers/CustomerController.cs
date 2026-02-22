@@ -29,9 +29,6 @@ public class CustomersController : ControllerBase
     var result = await _service.TogglePassportLocationAsync(id);
     return Ok(result);
   }
-
-
-
   [HttpPost]
   public async Task<IActionResult> Create([FromBody]CreateCustomerDto dto)
   {
