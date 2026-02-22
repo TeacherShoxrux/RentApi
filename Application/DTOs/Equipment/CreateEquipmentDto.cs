@@ -24,13 +24,8 @@ public class CreateEquipmentDto
   [Range(0, double.MaxValue, ErrorMessage = "Qiymat noto'g'ri kiritildi")]
   public decimal ReplacementValue { get; set; } // Mahsulotning asl qiymati (zalog uchun)
 
-  // --- UI dagi Qo'shimcha parametrlar ---
-
   public bool IsMainProduct { get; set; } = true; // Asosiy mahsulot yoki Qo'shimcha
 
   public bool HasAccessories { get; set; } = false; // Aksessuarlar mavjudligi
-
-  // --- Fayllar (Rasmlar) ---
-  // UI dagi "Fayl tanlash" qismi uchun
-  public List<IFormFile>? Images { get; set; }
+  public string? Image { get; set; }
 }

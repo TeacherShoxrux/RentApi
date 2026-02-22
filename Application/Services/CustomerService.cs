@@ -2,7 +2,8 @@ using System.Linq.Expressions;
 using RentApi.Application.DTOs;
 using RentApi.Application.Services.Interfaces;
 using RentApi.Data.Entities;
-using RentApi.Application.UnitOfWork; // Fayl saqlash uchun
+using RentApi.Application.UnitOfWork;
+using System.Text.Json; // Fayl saqlash uchun
 
 namespace RentApi.Application.Services;
 
@@ -20,12 +21,10 @@ public class CustomerService : ICustomerService
   public async Task<ResponseDto<CustomerDto>> CreateCustomerAsync(CreateCustomerDto dto)
   {
     try{
-    // 1. Validatsiya: JSHSHIR bo'yicha tekshirish
     var existing = await _unitOfWork.Customers.GetByDocumentAsync(dto.JShShIR);
     if (existing != null)
       throw new Exception($"Bu JSHSHIR ({dto.JShShIR}) bilan mijoz allaqachon mavjud!");
 
-    // 2. Mijoz (Customer) yaratish
     var customer = new Customer
     {
       FirstName = dto.FirstName,
@@ -34,7 +33,6 @@ public class CustomerService : ICustomerService
       DateOfBirth = dto.DateOfBirth ?? DateTime.MinValue,
       JShShIR = dto.JShShIR,
       Note = dto.Note,
-      // Telefonlarni birlashtirib saqlaymiz: "991234567,901234567"
       Phones= dto.Phones.Select(e=> new Phone
       {
         PhoneNumber = e.PhoneNumber,
@@ -43,49 +41,20 @@ public class CustomerService : ICustomerService
       CreatedAt = DateTime.UtcNow
     };
 
-    // 3. Hujjat (Document) yaratish
-    // UI dagi Seriya (AA) va Raqam (1234567) ni birlashtiramiz
-    string fullSerial = $"{dto.PassportSeries} {dto.PassportNumber}".Trim();
+    string fullSerial = $"{dto.PassportSeries}{dto.PassportNumber}".Trim().ToUpper();
 
     var document = new Document
     {
-      DocumentType = "Passport", // Yoki DTO dan keladigan DocumentType
+      DocumentType = "Passport",
       Name = "Shaxsni tasdiqlovchi hujjat",
       SerialNumber = fullSerial,
-      JShShR = dto.JShShIR, // Sizning klassdagi nom bilan bir xil
+      JShShR = dto.JShShIR,
       Details = dto.Note,
-
-      // --- ZALOG LOGIKASI ---
       IsOriginalLeft = dto.IsOriginalDocumentLeft,
       LeftAt = dto.IsOriginalDocumentLeft ? DateTime.UtcNow : null,
       Status = EDocumentStatus.Active,
-
-      // Fayl yo'li (Pastda yuklaymiz)
-      FilePath = "///"
+      FilePath =JsonSerializer.Serialize(dto.DocumentScans)
     };
-
-    // 4. Faylni yuklash (Passport Scan)
-  if (dto.DocumentScans != null && dto.DocumentScans.Count > 0)
-  {
-    var file = dto.DocumentScans[0];
-
-    // WebRootPath null bo'lsa, joriy papkadan foydalanamiz
-    string baseRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-    string uploadsFolder = Path.Combine(baseRoot, "uploads", "documents");
-
-    if (!Directory.Exists(uploadsFolder))
-      Directory.CreateDirectory(uploadsFolder);
-
-    string uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
-    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-    using (var fileStream = new FileStream(filePath, FileMode.Create))
-    {
-      await file.CopyToAsync(fileStream);
-    }
-
-    document.FilePath = $"/uploads/documents/{uniqueFileName}";
-  }
 
     // Hujjatni mijozga qo'shamiz
     customer.Documents.Add(document);

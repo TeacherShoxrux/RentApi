@@ -33,8 +33,7 @@ public class CustomersController : ControllerBase
 
 
   [HttpPost]
-  // [FromForm] ishlatamiz, chunki rasm va fayllar keladi
-  public async Task<IActionResult> Create([FromForm] CreateCustomerDto dto)
+  public async Task<IActionResult> Create([FromBody]CreateCustomerDto dto)
   {
     try
     {

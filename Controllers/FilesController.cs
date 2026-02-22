@@ -18,7 +18,6 @@ public class FilesController : ControllerBase
     // Faylni saqlaymiz va linkini olamiz
     var url = await _fileService.SaveFileAsync(file, folder);
 
-    // Faqat linkni qaytaramiz
     return Ok(ResponseDto<string>.Success(url) );
   }
 }

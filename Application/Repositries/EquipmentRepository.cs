@@ -17,7 +17,6 @@ public class EquipmentRepository : GenericRepository<Equipment>, IEquipmentRepos
       .Where(e => e.CategoryId == categoryId)
       .OrderByDescending(e => e.Items.Count) // Hozircha soni bo'yicha
       .Take(count)
-      .Include(e => e.Images)
       .ToListAsync();
   }
 

@@ -52,7 +52,7 @@ public class EquipmentService : IEquipmentService
           BrandName = e.Brand?.Name??"",
           CategoryName = e.Category?.Name??"",
           PricePerDay = e.PricePerDay,
-          ImageUrl = e.Images.FirstOrDefault()?.ImageUrl,
+          ImageUrl = e.ImageUrl,
           AvailableCount = e.Items.Count(i => i.Status == EEquipmentItemStatus.Available)
         });
 
@@ -74,21 +74,15 @@ public class EquipmentService : IEquipmentService
     
    await _unitOfWork.Repository<Brand>().AddAsync(brand);
    await _unitOfWork.CompleteAsync();
-
    return ResponseDto<int>.Success(brand.Id, "Brend yaratildi");
  }
 
- // --- KATEGORIYA QO'SHISH ---
  public async Task<ResponseDto<int>> CreateCategoryAsync(CreateCategoryDto dto)
  {
-   var category = new Category { Name = dto.Name };
-
-   if (dto.Image != null)
-     category.Image = await SaveFileAsync(dto.Image, "categories");
+   var category = new Category { Name = dto.Name,BrandId = dto.BrandId, Details = dto.Details ,Image = dto.Image};
 
    await _unitOfWork.Repository<Category>().AddAsync(category);
    await _unitOfWork.CompleteAsync();
-
    return ResponseDto<int>.Success(category.Id, "Kategoriya yaratildi");
  }
 
@@ -113,18 +107,11 @@ public class EquipmentService : IEquipmentService
      Model = dto.Model,
      Details = dto.Description,
     IsMainProduct = dto.IsMainProduct,
+    HasAccessories = dto.HasAccessories
 
    };
-
-   // Rasmlarni yuklash
-   if (dto.Images != null)
-   {
-     foreach (var img in dto.Images)
-     {
-       var path = await SaveFileAsync(img, "equipments");
-       equipment.Images.Add(new Image { ImageUrl = path });
-     }
-   }
+      if (dto.Image != null)
+        equipment.ImageUrl = dto.Image;
    var e= await _unitOfWork.Equipments.AddAsync(equipment);
    await _unitOfWork.CompleteAsync();
   List<EquipmentItem> items = new List<EquipmentItem>();
@@ -182,22 +169,21 @@ public class EquipmentService : IEquipmentService
 
  public async Task<ResponseDto<IEnumerable<CategoryDto>>> GetCategoriesByBrandAsync(int brandId)
  {
-   // Performance siri: Faqat shu brendga tegishli mahsulotlari bor kategoriyalarni qidiramiz
-   var categories = await _unitOfWork.Equipments.GetAllBoxedAsync(
-     filter: e => e.BrandId == brandId,
-     includeProperties: "Category"
-   );
+    var categories = await _unitOfWork.Repository<Category>().GetAllBoxedAsync(
+      filter: c => c.BrandId == brandId,
+      orderBy: q => q.OrderBy(c => c.Name)
+    );
 
    // Unikal kategoriyalarni ajratib olish
    var result = categories
-     .Select(e => e.Category)
      .GroupBy(c => c.Id)
      .Select(g => g.First())
      .Select(c => new CategoryDto
      {
        Id = c.Id,
        Name = c.Name,
-       ImageUrl = c.Image
+       ImageUrl = c.Image,
+       Details = c.Details
      });
 
    return ResponseDto<IEnumerable<CategoryDto>>.Success(result);

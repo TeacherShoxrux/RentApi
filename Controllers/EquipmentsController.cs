@@ -20,16 +20,18 @@ public class EquipmentsController : ControllerBase
     return Ok(result);
   }
   [HttpPost("brands")]
-  public async Task<IActionResult> AddBrand([FromForm] CreateBrandDto dto)
+  public async Task<IActionResult> AddBrand(CreateBrandDto dto)
     => Ok(await _service.CreateBrandAsync(dto));
 
   [HttpPost("categories")]
-  public async Task<IActionResult> AddCategory([FromForm] CreateCategoryDto dto)
+  public async Task<IActionResult> AddCategory(CreateCategoryDto dto)
     => Ok(await _service.CreateCategoryAsync(dto));
 
   [HttpPost]
-  public async Task<IActionResult> AddEquipment([FromForm] CreateEquipmentDto dto)
+  public async Task<IActionResult> AddEquipment([FromBody] CreateEquipmentDto dto)
     => Ok(await _service.CreateEquipmentAsync(dto));
+ 
+ 
   [HttpGet("brands")]
   public async Task<IActionResult> GetBrands()
   {

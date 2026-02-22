@@ -6,9 +6,9 @@ public class Equipment : BaseEntity
     public string Name { get; set; } = string.Empty;
     public string? Model { get; set; } = string.Empty;
     public bool? IsMainProduct { get; set; }
+    public bool? HasAccessories { get; set; }
     public string? Details { get; set; }
-
-    // Narxlar
+    
     public decimal PricePerDay { get; set; }
     public decimal ReplacementValue { get; set; }
     // Bog'liqliklar (Foreign Keys)
@@ -20,7 +20,7 @@ public class Equipment : BaseEntity
     public int? CustomerId { get; set; } // Hozirda kimdadir bo'lsa
     public virtual Customer? Customer { get; set; }
     public bool IsAvailable { get; set; } = true;
-
+    public string? ImageUrl { get; set; } = string.Empty;
     public virtual ICollection<EquipmentItem> Items { get; set; } = null!;
 
     // Navigatsiya propertylari (EF Core uchun)
@@ -28,5 +28,4 @@ public class Equipment : BaseEntity
     public virtual Brand? Brand { get; set; }
     public int CategoryId { get; set; }
     public virtual Category? Category { get; set; }
-    public virtual ICollection<Image> Images { get; set; } = new List<Image>();
 }

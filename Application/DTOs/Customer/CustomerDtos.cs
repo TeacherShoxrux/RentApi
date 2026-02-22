@@ -24,8 +24,8 @@ public class CreateCustomerDto
   public string? Note { get; set; } // "Details" maydoni uchun
 
   // Fayllar (Rasm va Scan)
-  public IFormFile? UserPhoto { get; set; }
-  public List<IFormFile>? DocumentScans { get; set; }
+  public string? UserPhotoUrl { get; set; }
+  public List<string>? DocumentScans { get; set; }
   public List<CreatePhoneDto> Phones { get; set; } = new List<CreatePhoneDto>();
 }
 
