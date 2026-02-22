@@ -67,11 +67,11 @@ public class EquipmentService : IEquipmentService
 
  public async Task<ResponseDto<int>> CreateBrandAsync(CreateBrandDto dto)
  {
-   var brand = new Brand { Name = dto.Name };
+   var brand = new Brand { Name = dto.Name, Details = dto.Details };
 
-   if (dto.Image != null)
-     brand.Image = await SaveFileAsync(dto.Image, "brands");
-
+    if (dto.ImageUrl != null)
+      brand.Image = dto.ImageUrl; 
+    
    await _unitOfWork.Repository<Brand>().AddAsync(brand);
    await _unitOfWork.CompleteAsync();
 

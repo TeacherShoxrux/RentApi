@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using RentApi.Application.DTOs;
 using RentApi.Application.Services.Interfaceses;
 
 namespace RentApi.Controllers;
@@ -10,14 +11,14 @@ public class FilesController : ControllerBase
   public FilesController(IFileStorageService fileService) => _fileService = fileService;
 
   [HttpPost("upload")]
-  public async Task<IActionResult> Upload(IFormFile? file, string folder = "temp")
+  public async Task<IActionResult> Upload(IFormFile? file)
   {
-    if (file == null) return BadRequest("Fayl yo'q");
-
+    if (file == null || file.Length == 0) return BadRequest("Fayl bo'sh");
+     string folder = "temp";
     // Faylni saqlaymiz va linkini olamiz
     var url = await _fileService.SaveFileAsync(file, folder);
 
     // Faqat linkni qaytaramiz
-    return Ok(new { link = url });
+    return Ok(ResponseDto<string>.Success(url) );
   }
 }
