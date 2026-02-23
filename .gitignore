@@ -33,7 +33,7 @@ mono_crash.*
 *.sqlite
 *.sqlite3
 
-
+wwwroot/uploads/
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

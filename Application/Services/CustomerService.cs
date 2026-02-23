@@ -33,6 +33,7 @@ public class CustomerService : ICustomerService
       DateOfBirth = dto.DateOfBirth ?? DateTime.MinValue,
       JShShIR = dto.JShShIR,
       Note = dto.Note,
+      UserPhoto= dto.UserPhotoUrl,
       Phones= dto.Phones.Select(e=> new Phone
       {
         PhoneNumber = e.PhoneNumber,
@@ -41,7 +42,9 @@ public class CustomerService : ICustomerService
       CreatedAt = DateTime.UtcNow
     };
 
-    string fullSerial = $"{dto.PassportSeries}{dto.PassportNumber}".Trim().ToUpper();
+    string series = dto.PassportSeries ?? "";
+    string number = dto.PassportNumber ?? "";
+    string fullSerial = $"{series}{number}".Trim().ToUpper();
 
     var document = new Document
     {
@@ -55,11 +58,8 @@ public class CustomerService : ICustomerService
       Status = EDocumentStatus.Active,
       FilePath =JsonSerializer.Serialize(dto.DocumentScans)
     };
-
-    // Hujjatni mijozga qo'shamiz
     customer.Documents.Add(document);
 
-    // 5. Bazaga saqlash
     await _unitOfWork.Customers.AddAsync(customer);
     await _unitOfWork.CompleteAsync();
 
@@ -155,7 +155,7 @@ public async Task<ResponseDto<bool>> TogglePassportLocationAsync(int customerId)
   // Yordamchi Mapper
   private CustomerDto MapToDto(Customer c)
   {
-    var mainDoc = c.Documents.FirstOrDefault(); // Asosiy hujjat
+    // var mainDoc = c.Documents.FirstOrDefault(); // Asosiy hujjat
 
     return new CustomerDto
     {
@@ -164,10 +164,10 @@ public async Task<ResponseDto<bool>> TogglePassportLocationAsync(int customerId)
       LastName = c.LastName,
       JShShIR = c.JShShIR,
       // Agar SerialNumber "AA 1234567" bo'lsa, uni ajratib ko'rsatish mumkin
-      PassportSeries = mainDoc?.SerialNumber.Split(' ')[0] ?? "",
-      PassportNumber = mainDoc?.SerialNumber.Split(' ')[1] ?? "",
+      // PassportSeries = mainDoc?.SerialNumber.Split(' ')[0] ?? "",
+      // PassportNumber = mainDoc?.SerialNumber.Split(' ')[1] ?? "",
 
-      IsOriginalDocumentLeft = mainDoc?.IsOriginalLeft ?? false,
+      // IsOriginalDocumentLeft = mainDoc?.IsOriginalLeft ?? false,
       // ... boshqa maydonlar
     };
   }
